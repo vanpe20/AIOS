@@ -45,7 +45,7 @@ class AgentFactory:
         agent_class = getattr(agent_module, class_name)
         return agent_class
 
-    def activate_agent(self, agent_name, task_input):
+    def activate_agent(self, agent_name, task_input,data_path=None,use_llm=None):
         script_path = os.path.abspath(__file__)
         script_dir = os.path.dirname(script_path)
 
@@ -58,13 +58,25 @@ class AgentFactory:
             interactor.install_agent_reqs(agent_name)
 
         agent_class = self.load_agent_instance(agent_name)
+        _, name = agent_name.split("/")
 
-        agent = agent_class(
-            agent_name = agent_name,
-            task_input = task_input,
-            agent_process_factory = self.agent_process_factory,
-            log_mode = self.agent_log_mode
-        )
+        #New agent need path of db
+        if name != 'retrieve_summary_agent':
+            agent = agent_class(
+                agent_name = agent_name,
+                task_input = task_input,
+                agent_process_factory = self.agent_process_factory,
+                log_mode = self.agent_log_mode
+            )
+        else:
+            agent = agent_class(
+                agent_name = agent_name,
+                task_input = task_input,
+                data_path = data_path,
+                use_llm = use_llm,
+                agent_process_factory = self.agent_process_factory,
+                log_mode = self.agent_log_mode
+            )
 
         aid = heapq.heappop(self.aid_pool)
 
@@ -82,6 +94,16 @@ class AgentFactory:
             task_input=task_input
         )
         # print(task_input)
+        output = agent.run()
+        self.deactivate_agent(agent.get_aid())
+        return output
+    def run_retrieve(self,agent_name,task_input,data_path,use_llm):
+        agent = self.activate_agent(
+            agent_name=agent_name,
+            task_input=task_input,
+            data_path=data_path,
+            use_llm=use_llm
+        )
         output = agent.run()
         self.deactivate_agent(agent.get_aid())
         return output
