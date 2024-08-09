@@ -45,7 +45,7 @@ class AgentFactory:
         agent_class = getattr(agent_module, class_name)
         return agent_class
 
-    def activate_agent(self, agent_name, task_input,data_path=None,use_llm=None):
+    def activate_agent(self, agent_name, task_input,data_path=None,use_llm=None,raw_datapath = None,monitor_path = None):
         script_path = os.path.abspath(__file__)
         script_dir = os.path.dirname(script_path)
 
@@ -58,10 +58,10 @@ class AgentFactory:
             interactor.install_agent_reqs(agent_name)
 
         agent_class = self.load_agent_instance(agent_name)
-        _, name = agent_name.split("/")
+        folder, name = agent_name.split("/")
 
         #New agent need path of db
-        if name != 'retrieve_summary_agent':
+        if folder != 'file_management':
             agent = agent_class(
                 agent_name = agent_name,
                 task_input = task_input,
@@ -75,7 +75,9 @@ class AgentFactory:
                 data_path = data_path,
                 use_llm = use_llm,
                 agent_process_factory = self.agent_process_factory,
-                log_mode = self.agent_log_mode
+                log_mode = self.agent_log_mode,
+                raw_datapath = raw_datapath,
+                monitor_path = monitor_path
             )
 
         aid = heapq.heappop(self.aid_pool)
@@ -97,12 +99,14 @@ class AgentFactory:
         output = agent.run()
         self.deactivate_agent(agent.get_aid())
         return output
-    def run_retrieve(self,agent_name,task_input,data_path,use_llm):
+    def run_retrieve(self,agent_name,task_input,data_path,use_llm,raw_datapath=None,monitor_path=None):
         agent = self.activate_agent(
             agent_name=agent_name,
             task_input=task_input,
             data_path=data_path,
-            use_llm=use_llm
+            use_llm=use_llm,
+            raw_datapath=raw_datapath,
+            monitor_path=monitor_path
         )
         output = agent.run()
         self.deactivate_agent(agent.get_aid())

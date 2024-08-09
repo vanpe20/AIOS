@@ -1,17 +1,18 @@
-from ...FileAgent import FileAgent
+from ...RollbackAgent import RollbackAgent
 
-class RetrieveSummaryAgent(FileAgent):
+class Roll_backAgent(RollbackAgent):
     def __init__(self,
                  agent_name,
                  task_input,
-                 data_path,
-                 use_llm,
                  agent_process_factory,
                  log_mode:str,
+                 use_llm = None,
+                 data_path = None,
                  sub_name=None,
                  raw_datapath = None,
+                 monitor_path = None
         ):
-        FileAgent.__init__(self,agent_name,task_input,data_path,use_llm,agent_process_factory,log_mode)
+        RollbackAgent.__init__(self,agent_name,task_input,agent_process_factory,log_mode, data_path, use_llm, raw_datapath=raw_datapath,monitor_path=None)
         self.workflow_mode = "automatic"
 
         def manaul_workflow(self):

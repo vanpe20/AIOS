@@ -26,26 +26,37 @@ import shutil
 
 
 class Data_Op(DBStorage):
-    def __init__(self,retri_dic):
-        pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
-        self.redis_client = redis.Redis(connection_pool=pool)
+    def __init__(self,retri_dic,redis_client):
+        # pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+        # self.redis_client = redis.Redis(connection_pool=pool)
+        self.redis_client = redis_client
+        self.redis_client.select(0)
         self.embed_model =  HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
         self.retri_dic = retri_dic
         super().__init__(self.redis_client, self.embed_model,self.retri_dic)
 
 
 
-    def create(self,db_path,db_name,doc):
+    def create(self,db_path,db_name,doc,metaname=None):
         # create chroma database by single doc or file
         if not os.path.exists(doc):
             super().create_or_get_collection(db_path,db_name,doc)
         else:
-            if os.listdir(doc):
+            if os.path.isdir(doc):
                 for root, dirs, filenames in os.walk(doc):
                         for filename in filenames:
                             print(filename)
+                            filename, _ = os.path.splitext(filename)
                             docu = os.path.join(root, filename)
                             super().create_or_get_collection(db_path,db_name,filename,docu)
+            else:
+                name = os.path.basename(doc)
+                name = os.path.splitext(name)[0]
+                if metaname is None:
+                    super().create_or_get_collection(db_path,db_name,name,doc)
+                else:
+                    super().create_or_get_collection(db_path,db_name,metaname,doc)
+
 
         # return super().create_or_get_collection(db_path,db_name)
     def insert(self,db_path,db_name,doc,metaname):
@@ -63,7 +74,7 @@ class Data_Op(DBStorage):
 
     
     def update(self,db_path,db_name,doc,obj=None):
-
+        
         return super().change_db(db_path,db_name,doc,obj)
     
     def delete(self,db_path,db_name,metaname):
@@ -271,9 +282,11 @@ class Data_Op(DBStorage):
         ans = ''.join(ans)
         return ans, name
 
-    def get_collection(self,db_path,db_name):
-        collection = self.create_or_get_collection(db_path,db_name)
-        print(collection.database)
+    def get_collection(self,db_path,db_name,metaname=None):
+        
+        collection = self.create_or_get_collection(db_path,db_name,metaname=metaname)
+        return collection
+    
         # res = collection.get(ids=['188a8336-eab0-455b-b78e-28e011e34b19'])
         # print(res)
         # print(collection)

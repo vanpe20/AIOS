@@ -20,7 +20,7 @@ import logging
 import subprocess
 
 import numpy as np
-class FileAgent(BaseAgent):
+class RetrieveSummary(BaseAgent):
     def __init__(self,
                  agent_name,
                  task_input,
@@ -30,6 +30,7 @@ class FileAgent(BaseAgent):
                  log_mode,
                  sub_name=None,
                  raw_datapath = None,
+                 monitor_path = None
         ):
         BaseAgent.__init__(self, agent_name, task_input, agent_process_factory, log_mode)
         self.data_path = data_path
@@ -274,6 +275,6 @@ if __name__ == "__main__":
     parser.add_argument("--task_input")
 
     "Please search  "
-    args = parser.parse_args()
-    agent = FileAgent(args.agent_name, args.task_input)
-    agent.run()
+    # args = parser.parse_args()
+    # agent = FileAgent(args.agent_name, args.task_input)
+    # agent.run()

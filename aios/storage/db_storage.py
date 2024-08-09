@@ -38,14 +38,19 @@ class DBStorage:
 
     def create_or_get_collection(self,db_path,db_name,metaname=None,doc=None):
 
+
         path = os.path.join(db_path,db_name)
+        if metaname is None:
+            chroma_client = chromadb.PersistentClient(path=path)
+            return chroma_client
+
         if doc is None:
             chroma_client = chromadb.PersistentClient(path=path)
             chroma_collection = chroma_client.get_collection(metaname)
             # vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
             # storage_context = StorageContext.from_defaults(vector_store=vector_store)
             # index = VectorStoreIndex(storage_context=storage_context, embed_model=self.embed_model)
-            # return chroma_collection
+            return chroma_collection
         
         else:
             chroma_client = chromadb.PersistentClient(path=path)
@@ -66,8 +71,8 @@ class DBStorage:
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
             # index = VectorStoreIndex.from_vector_store(vector_store, embed_model=self.embed_model)
             index = VectorStoreIndex.from_documents(documents,storage_context=storage_context, embed_model=self.embed_model)
-        path = os.path.join(path,metaname)
-        index.storage_context.persist(persist_dir=path)
+            path = os.path.join(path,metaname)
+            index.storage_context.persist(persist_dir=path)
         
         # return chroma_collection
             
@@ -129,7 +134,7 @@ class DBStorage:
 
     
     def change_db(self,db_path,db_name,doc,metaname):
-        change_path = os.path.join(db_path,db_name,metaname)
+        change_path = os.path.join(db_path,db_name)
         if not os.path.exists(change_path):
             raise FileNotFoundError('change path is not exist')
         else:
@@ -145,13 +150,14 @@ class DBStorage:
                 # document = Document(id=id, content=doc)
                 document = [doc]
             embedding = self.embed_model._embed(document)
-            chroma_collection.update(ids = ids, embeddings=embedding)
+            chroma_collection.update(ids = [str(ids)], embeddings=embedding)
             vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
             index = VectorStoreIndex.from_vector_store(vector_store, embed_model=self.embed_model)
             index.storage_context.persist(persist_dir=change_path)
         
         if self.redis_client.exists(metaname):
             self.redis_client.set(metaname, documents)
+
         return chroma_collection
     
 

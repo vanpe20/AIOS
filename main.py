@@ -88,13 +88,13 @@ def main():
     #     "Convert 15000 MXN to Canadian Dollars and find out how much it would be in USD if 1 CAD equals 0.79 USD."
     # )
 
-    academic_agent = agent_thread_pool.submit(
-        agent_factory.run_agent,
-        "example/academic_agent",
-        "Summarize recent advancements in quantum computing from the past five years.",
-    )
+    # academic_agent = agent_thread_pool.submit(
+    #     agent_factory.run_agent,
+    #     "example/academic_agent",
+    #     "Summarize recent advancements in quantum computing from the past five years.",
+    # )
 
-    # rec_agent = agent_thread_pool.submit(
+    # # rec_agent = agent_thread_pool.submit(
     #     agent_factory.run_agent,
     #     "example/rec_agent", "Recommend two movies with groundbreaking visual effects released in the last fifteen years ranked between 1 and 20 with ratings above 8.0."
     # )
@@ -103,17 +103,48 @@ def main():
     #     agent_factory.run_agent,
     #     "example/creation_agent", "Create an image of a lush jungle with an ancient temple, evoking a sense of mystery and adventure."
     # )
-    retrieve_summaryagent = agent_thread_pool.submit(
+    # retrieve_summaryagent = agent_thread_pool.submit(
+    #     agent_factory.run_retrieve,
+    #    "example/retrieve_summary_agent",
+    #     "Please search paper contains Rutgers University from rag_paper",
+    #     '/Users/manchester/Documents/data/rag_database',
+    #     True
+    # )
+    # change_monitoragent = agent_thread_pool.submit(
+    #     agent_factory.run_retrieve,
+    #    "file_management/change_monitor_agent",
+    #     "Please change content in '/Users/manchester/Documents/rag/rag_source/physics/quantum.txt' to quantum of database physics",
+    #     '/Users/manchester/Documents/data/rag_database',
+    #     True,
+    #     '/Users/manchester/Documents/rag/rag_source/change_data/quantum.txt',
+    #     '/Users/manchester/Documents/rag/rag_source/physics'
+    # )
+    # translation_agent = agent_thread_pool.submit(
+    #     agent_factory.run_retrieve,
+    #    "file_management/translation_agent",
+    #     "Please translate file named quantum to Chinese",
+    #     '/Users/manchester/Documents/data/rag_database',
+    #     True,
+    # )
+
+    # rollback_agent = agent_thread_pool.submit(
+    #     agent_factory.run_retrieve,
+    #    "file_management/rollback_agent",
+    #     "Please rollback file named quantum to the version in 2024-01-03",
+    #     '/Users/manchester/Documents/data/rag_database',
+    #     True,
+    # )
+    link_agent = agent_thread_pool.submit(
         agent_factory.run_retrieve,
-       "example/retrieve_summary_agent",
-        "Please search paper contains Rutgers University from rag_paper",
+       "file_management/link_agent",
+        "/Users/manchester/Documents/rag/rag_source/rag_paper/AIOS.pdf ",
         '/Users/manchester/Documents/data/rag_database',
-        True
+        True,
     )
 
     # agent_tasks = [travel_agent, rec_agent, creation_agent, math_agent, academic_agent]
     # agent_tasks = [rec_agent]
-    agent_tasks = [retrieve_summaryagent]
+    agent_tasks = [link_agent]
     # agent_tasks = [academic_agent, creation_agent]
     # agent_tasks = [creation_agent]
 
