@@ -1,6 +1,6 @@
 # Storing to json files to offload conversation history
 
-from aios.storage.base import BaseStorage
+from aios_base.storage.base import BaseStorage
 
 import json
 

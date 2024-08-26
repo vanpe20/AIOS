@@ -8,7 +8,7 @@ from pyopenagi.agents.agent_process import (
 )
 
 from pyopenagi.utils.chat_template import Query
-from aios.storage.db_sdk import Data_Op
+from aios_base.storage.db_sdk import Data_Op
 import threading
 import argparse
 
@@ -30,6 +30,8 @@ class LinkAgent(BaseAgent):
                  agent_name,
                  task_input,
                  data_path,
+                 retric_dic,
+                 redis,
                  agent_process_factory,
                  log_mode,
                  use_llm = None,
@@ -45,11 +47,10 @@ class LinkAgent(BaseAgent):
         self.monitor_path = monitor_path
         self.file_mod_times = {}
         self.active = False
-        retric_dic = {}
+        self.retric_dic =retric_dic,
         self.tools = None
-        self.link = GoogleLink()
-        pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
-        self.redis_client = redis.Redis(connection_pool=pool)
+        # self.link = GoogleLink()
+        self.redis_client = redis
         self.database = Data_Op(retric_dic,self.redis_client)
 
     def build_system_instruction(self):
@@ -74,6 +75,8 @@ class LinkAgent(BaseAgent):
     def match(self,text):
         result = text.split(",")
         name, date = result[0], result[1]
+        if date == 'None':
+            return name,None
 
         pattern = re.compile(r'(?:(\d+)\s*days?)?\s*(?:(\d+)\s*weeks?)?\s*(?:(\d+)\s*hours?)?\s*(?:(\d+)\s*minutes?)?\s*(?:(\d+)\s*seconds?)?')
         match = pattern.search(date)
@@ -115,16 +118,34 @@ class LinkAgent(BaseAgent):
         # self.redis_client.select(1)
         self.build_system_instruction()
 
-        task_input = "The task you need to solve is writing a codes to generate a link for: " + self.task_input
+        # task_input = "The task you need to solve is writing a codes to generate a link for: " + self.task_input
 
-        self.logger.log(f"{task_input}\n", level="info")
+        # self.logger.log(f"{task_input}\n", level="info")
 
         request_waiting_times = []
         request_turnaround_times = []
         rounds = 0
         workflow = self.config['workflow']
         for i, step in enumerate(workflow):
-            prompt = f"\nAt current step, you need to {workflow} {self.task_input}"
+            with open('/Users/manchester/Documents/rag/AIOS/test/link.txt', 'r') as file:
+                for line in file:
+                    prompt = f"\nAt current step, you should to {workflow}. The sentence is {line}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for file named aios. You should \
+                            output in this format \'aios, 5 days 3 hours\'.  You need to output like format without other extra words"
+                    self.messages.append({"role": "user", "content": prompt})
+                    tool_use = None
+                    response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+                    query = Query(
+                            messages = self.messages,
+                            tools = tool_use
+                            )
+                    )
+                    response_message = response.response_message
+                    print(response_message)
+                    logging.info(response_message)
+                    self.messages = self.messages[:1]
+            print(ssd)
+            prompt = f"\nAt current step, you need to {workflow} {self.task_input}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for aios. You need \
+                to output \'aios, 5 days 3 hours\'. If you input Please generate links for aios, there is not period of validity, you should output \'aios, None\'. You need to output like format without other words"
             self.messages.append(
                     {"role": "user", 
                     "content": prompt}
@@ -158,10 +179,10 @@ class LinkAgent(BaseAgent):
         self.set_status("done")
         self.set_end_time(time=time.time())
         
-        # name, date = self.match(response_message)
-        # path = self.search_path(name)
-        # link = self.link.generate_shareable_link(path,date)
-        # self.logger.log(f"{link}\n", level="info")
+        name, date = self.match(response_message)
+        path = self.search_path(name)
+        link = self.link.generate_shareable_link(path,date)
+        self.logger.log(f"{link}\n", level="info")
 
         return {
             "agent_name": self.agent_name,

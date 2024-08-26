@@ -1,7 +1,7 @@
 # This manages restoring and snapshotting the context.
 # The file is used in the BaseLLM class and the RRScheduler class.
 
-from aios.context.base import BaseContextManager
+from aios_base.context.base import BaseContextManager
 
 import os
 

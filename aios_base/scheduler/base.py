@@ -3,9 +3,9 @@
 
 from threading import Thread
 
-from aios.llm_core.llms import LLM
+from aios_base.llm_core.llms import LLM
 
-from aios.utils.logger import SchedulerLogger
+from aios_base.utils.logger import SchedulerLogger
 class BaseScheduler:
     def __init__(self, llm: LLM, log_mode):
         self.active = False # start/stop the scheduler

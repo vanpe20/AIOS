@@ -1,0 +1,11 @@
+if the paper's author contains Mingyu Jin
+if the paper's author's school contains The University of Hong Kong
+if the paper's author's school contains Carnegie Mellon University
+if the paper's author's school contains Rutgers University
+if the paper's author's school contains Peking University and Rutgers University
+if the paper's author's school contains Microsoft
+use paper in the past input history to find the top two papers that is most relevant to prompt engineering then output the name of them respectively.
+use paper in the past input history to find the top two papers that is most relevant to LLM Uncertainty then output shortly the name of them respectively.
+use paper in the past input history to find the top three papers that is most relevant to Large Language Model then output shortly the name of them respectively.
+use paper in the past input history to find the top two papers that is most relevant to Adversarial attack then output shortly the name of them respectively.
+

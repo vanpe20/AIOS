@@ -4,7 +4,7 @@
         "You are an expert who is good at summarizing the file."
     ],
     "workflow": [
-      "find , paper's context in the <context></context>, the condition is"
+      "use the following context as your learned knowledge, inside <context></context> XML tags, and summarize them. Avoid mentioning that you obtained the information from the context."
     ],
     "tools": "None",
     "meta": {

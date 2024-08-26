@@ -1,0 +1,30 @@
+Update the content in /Users/anna/Documents/nlp/nlp_source/linguistics/syntax.txt to 'syntax' within the 'linguistics' category.
+Change the content of /Users/alex/Documents/ml/ml_source/computer_vision/cnn.txt to 'cnn' under 'computer_vision'.
+Replace the content in /Users/john/Documents/ai/ai_source/ethics/ai_ethics.txt with 'ethics' in the 'ai' folder.
+Set the content of /Users/emma/Documents/math/math_source/algebra/algebraic_structures.txt to 'algebra' in the 'math' directory.
+Modify the file /Users/li/Documents/physics/physics_source/relativity/relativity_theory.txt to contain 'relativity' within 'physics'.
+Change the text in /Users/sophia/Documents/cs/cs_source/data_structures/trees.txt to 'trees' in the 'data_structures' section.
+Update the contents of /Users/mike/Documents/bio/bio_source/genetics/dna_sequence.txt to 'dna' in 'genetics'.
+Alter the file /Users/james/Documents/chemistry/chem_source/organic/organic_reactions.txt to include 'organic' in the 'chemistry' category.
+Revise the content of /Users/kate/Documents/economics/econ_source/macro/macroeconomics.txt to 'macro' within 'economics'.
+Change the content in /Users/chris/Documents/music/music_source/composition/harmony.txt to 'harmony' under 'composition'.
+Update /Users/sam/Documents/engineering/eng_source/electrical/circuits.txt to reflect 'circuits' in 'electrical'.
+Replace the text in /Users/mary/Documents/art/art_source/painting/impressionism.txt with 'impressionism' in 'painting'.
+Modify /Users/oliver/Documents/history/hist_source/ancient_rome/roman_empire.txt to contain 'rome' within 'history'.
+Change the content of /Users/lucy/Documents/philosophy/phil_source/metaphysics/reality.txt to 'reality' in 'metaphysics'.
+Set the content of /Users/david/Documents/math/math_source/geometry/euclidean.txt to 'euclidean' in 'geometry'.
+Update /Users/natalie/Documents/astronomy/astro_source/cosmology/big_bang.txt to 'bang' within 'cosmology'.
+Replace the text in /Users/jack/Documents/literature/lit_source/modernism/joyce.txt with 'joyce' in 'modernism'.
+Modify the file /Users/claire/Documents/psychology/psych_source/cognitive/cognition.txt to include 'cognition' in 'psychology'.
+Change the content of /Users/leo/Documents/law/law_source/international/treaties.txt to 'treaties' under 'international_law'.
+Set the content of /Users/ryan/Documents/linguistics/ling_source/phonetics/sounds.txt to 'sounds' in 'phonetics'.
+Update the file /Users/julia/Documents/ai/ai_source/nlp/transformers.txt to reflect 'transformers' in 'nlp'.
+Change the content in /Users/henry/Documents/climate/climate_source/meteorology/storms.txt to 'storms' in 'meteorology'.
+Replace the text of /Users/amelia/Documents/geology/geo_source/petrology/rock_cycle.txt with 'rock_cycle' in 'petrology'.
+Modify the file /Users/alice/Documents/sociology/soc_source/social_theory/marxism.txt to 'marxism' within 'social_theory'.
+Update the content in /Users/oscar/Documents/robotics/rob_source/autonomy/self_driving.txt to 'driving' in 'autonomy'.
+Change the content of /Users/ella/Documents/finance/fin_source/investment/portfolio.txt to 'portfolio' under 'investment'.
+Set the content of /Users/ethan/Documents/med/med_source/epidemiology/disease_models.txt to 'models' in 'epidemiology'.
+Update the file /Users/lily/Documents/ai/ai_source/reinforcement/rl_basics.txt to include 'rl_basics' in 'reinforcement'.
+Replace the text in /Users/arthur/Documents/chemistry/chem_source/inorganic/periodic_table.txt with 'periodic_table' in 'inorganic'.
+Modify the content of /Users/zoe/Documents/math/math_source/statistics/probability.txt to 'probability' in 'statistics'.

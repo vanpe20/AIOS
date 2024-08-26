@@ -1,0 +1,30 @@
+Generate a link for acsd that remains valid for the next 7 days.
+Please create a link for hacs with a validity of 1 year.
+Provide a link for llm_base that will be active for 3 months.
+Ensure a link for precs valid for the next 24 hours.
+Create a link for ccmeta that will stay valid for 2 weeks.
+A link for meeting_notes should be generated and valid for 10 days.
+Generate a link for research_paper that lasts for 6 months.
+Produce a link for financial_report valid for 30 days.
+Make sure to generate a link for project_overviewthat lasts 15 seconds.
+A link for user_guide needs to be created, valid for 1 year.
+Generate a link for codebase with a validity of 2 days.
+Please provide a link for budget_plan that is valid for 1 month.
+Create a link for design_mockup with a validity period of 8 hours.
+Ensure a link for task_list is valid for the next 5 days.
+Produce a link for event_schedule valid for 1 week.
+A link for key_pro should be generated and valid for 3 years 5 months.
+Generate a link for feedback_form that is active for 12 hours 40 minutes.
+Create a link for user_manual that will remain valid for 9 months.
+Please provide a link for study_guide with a validity of 1 hour.
+A link for system_architecture needs to be valid for 10 weeks.
+Generate a link for conference_agenda that stays valid for 2 years.
+Make sure to create a link for team_photo that will be active for 6 days.
+Please generate a link for software_update valid for 7 hours.
+A link for sales_report should be produced with a validity of 14 days.
+Create a link for training_material that is valid for 20 minutes.
+Ensure a link for risk_assessment is valid for 1 month.
+Provide a link for dash_voc valid for the next 3 weeks.
+Generate a link for project_plan that remains valid for 90 days.
+Please create a link for research_notes with a validity of 5 years.
+Make sure a link for video_tutorial is generated and valid for 2 hours.

@@ -1,7 +1,7 @@
 # This file will be an implementation of the shared memory mechanism for
 # multi-agent systems
 
-from aios.memory.base import BaseMemory
+from aios_base.memory.base import BaseMemory
 
 '''
 TODO: implement the shared memory mechanism

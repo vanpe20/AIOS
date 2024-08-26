@@ -1,10 +1,10 @@
 {
     "name": "LinkAgent",
     "description": [
-         "You are an expert who is good at writing python codes."
+         "You are an expert who is good at extracting messages from a sentence."
     ],
     "workflow": [
-      "You should write codes of the file in the file path to generate a link of it, the path is "
+      "extract the filename and expiration date from the sentence directly, then separating the results by commas. You don't need to generate code."
     ],
     "tools": "None",
     "meta": {

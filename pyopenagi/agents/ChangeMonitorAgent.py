@@ -8,10 +8,10 @@ from pyopenagi.agents.agent_process import (
 )
 
 from pyopenagi.utils.chat_template import Query
-from aios.storage.db_sdk import Data_Op
+from aios_base.storage.db_sdk import Data_Op
 import threading
 import argparse
-from utils.filereader import update_file
+from pyopenagi.utils.filereader import update_file
 
 from concurrent.futures import as_completed
 import re
@@ -30,6 +30,8 @@ class ChangeAgent(BaseAgent):
                  task_input,
                  data_path,
                  use_llm,
+                 retric_dic,
+                 redis,
                  agent_process_factory,
                  log_mode,
                  raw_datapath = None,
@@ -44,10 +46,9 @@ class ChangeAgent(BaseAgent):
         self.monitor_path = monitor_path
         self.file_mod_times = {}
         self.active = False
-        retric_dic = {}
+        self.retric_dic = retric_dic
         self.tools = None
-        pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
-        self.redis_client = redis.Redis(connection_pool=pool)
+        self.redis_client = redis
         self.database = Data_Op(retric_dic,self.redis_client)
 
     def scan_files(self):
@@ -78,23 +79,11 @@ class ChangeAgent(BaseAgent):
         monitor_thread = threading.Thread(target=self.monitor_files)
         monitor_thread.start()
         return monitor_thread
-    
-    def match(self,input):
-        
-        pattern = r"Please change content in (.*?) to (.*?) of database (.*)"
-        match = re.search(pattern, input)
-        if match:
-            alter_data, metaname, sub_name = match.groups(1)[0],match.groups(1)[1],match.groups(1)[2]
-        else:
-            raise ValueError('Please input order in correct format')
 
-        return alter_data, metaname, sub_name
-
-
-    def build_system_instruction(self):
+    def build_system_instruction(self,i):
         prefix = "".join(
             [
-                "".join(self.config["description"])
+                "".join(self.config["description"][i])
             ]
         )        
         self.messages.append(
@@ -113,15 +102,40 @@ class ChangeAgent(BaseAgent):
     
                 
     def run(self):
-        self.build_system_instruction()
+        # self.redis_client.select(1)
+        # keys = self.redis_client.keys('*')
+        # for key in keys:
+        #     print(self.redis_client.llen(key))
+            # values = self.redis_client.lrange(key, 0, -1)  # 获取列表中的所有元素
+            # print(values)
+
+        
+        self.build_system_instruction(0)
 
         if self.use_llm is False:
             task_input = "The task you need to solve is: " + self.task_input
         else:
             task_input = "The task you need to solve is: " + self.task_input + ' than summarize the difference between two files'
 
+        i = 0
+        # with open('/Users/manchester/Documents/rag/AIOS/test/cs_example.txt', 'r') as file:
+
+        workflow = self.config['workflow'][0]
+        prompt = f"\nAt current step, you need to {workflow}, the sentence is {self.task_input}. Here is the example, if the input is  Please change content in '/Users/manchester/Documents/rag/rag_source/physics/quantum.txt' to old_quan in physics\
+                    Your output should be\'/Users/manchester/Documents/rag/rag_source/physics/quantum.txt, old_quan, physics\'. You need to output like format without other words"
+        self.messages.append(
+                            {"role": "user", 
+                            "content": prompt}
+                        )
+        response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+        query = Query(
+                            messages = self.messages,
+                            tools = None))
+        response_message = response.response_message
+        result = response_message.split(",")
+        alter_data,metaname,sub_name = result[0], result[1], result[2]
+        
         self.logger.log(f"{task_input}\n", level="info")
-        alter_data, metaname, sub_name = self.match(self.task_input)
         path = os.path.join(self.data_path,sub_name,metaname)
         if not os.path.exists(path):
             if self.raw_datapath is None:
@@ -140,7 +154,6 @@ class ChangeAgent(BaseAgent):
                 break
     def version(self,text_name,text_date,text_before,text_path,db_path,sub_name):
         self.redis_client.select(1)
-
         file_info = {
             "file_name": text_name,
             "last_modified_date": text_date,
@@ -152,13 +165,14 @@ class ChangeAgent(BaseAgent):
         redis_key = file_info['file_name']
         file_info_json = json.dumps(file_info)
 
-        if self.redis_client.llen(redis_key) > 5 and self.redis_client.exists(redis_key):
+        if self.redis_client.llen(redis_key) > 40 and self.redis_client.exists(redis_key):
             loc = self.redis_client.lindex(redis_key,-1)
             self.redis_client.ltrim(loc,0,9)
 
         self.redis_client.rpush(redis_key, file_info_json)
 
     def monitor_run(self,sub_name,metaname,alter_data):
+        
         
         collection_fore = self.database.get_collection(self.data_path,sub_name,metaname=metaname)
         text_before = collection_fore.get()['documents']
@@ -174,6 +188,11 @@ class ChangeAgent(BaseAgent):
         collection_lat = self.database.update(self.data_path,sub_name,alter_data,obj=metaname)
         text_end = collection_lat.get()['documents']
         update_file(text_path ,text_end)
+        print("version remember !!!!!!!!!!")
+
+        self.messages = []
+        self.build_system_instruction(1)
+
         
 
         request_waiting_times = []
@@ -183,40 +202,40 @@ class ChangeAgent(BaseAgent):
         result = []
         # response_message = ''
     
-        workflow = self.config['workflow']
-        for i, step in enumerate(workflow):
-            prompt = f"\nAt current step, you need to {workflow}, the content before the update is <context>{text_before}</context>, the content after the update is <context>{text_end}</context>"
-            self.messages.append(
+        workflow = self.config['workflow'][1]
+        # for i, step in enumerate(workflow):
+        prompt = f"\nAt current step, you need to {workflow}, the content before the update is <context>{text_before}</context>, the content after the update is <context>{text_end}</context>"
+        self.messages.append(
                     {"role": "user", 
                     "content": prompt}
                 )
-            tool_use = None
-            response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
-            query = Query(
+        tool_use = None
+        response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+        query = Query(
                     messages = self.messages,
                     tools = tool_use
                     )
             )
 
-            response_message = response.response_message
+        response_message = response.response_message
 
-            request_waiting_times.extend(waiting_times)
-            request_turnaround_times.extend(turnaround_times)
+        request_waiting_times.extend(waiting_times)
+        request_turnaround_times.extend(turnaround_times)
 
-            if i == 0:
-                self.set_start_time(start_times[0])
+            # if i == 0:
+        self.set_start_time(start_times[0])
 
                 # tool_calls = response.tool_calls
                 
-            self.messages.append({
+        self.messages.append({
                     "role": "user",
                     "content": response_message
-                })
+        })
 
-            if i == len(workflow) - 1:
-                final_result = self.messages[-1]
-            self.logger.log(f"{response_message}\n", level="info")
-            rounds += 1
+            # if i == len(workflow) - 1:
+        final_result = self.messages[-1]
+        self.logger.log(f"{response_message}\n", level="info")
+        rounds += 1
         self.set_status("done")
         self.set_end_time(time=time.time())
 

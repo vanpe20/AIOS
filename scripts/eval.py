@@ -1,5 +1,5 @@
 # This file is used to evaluate the configuration passed through arguments to the simulation of the kernel
-from aios.scheduler.fifo_scheduler import FIFOScheduler
+from aios_base.scheduler.fifo_scheduler import FIFOScheduler
 
 from pyopenagi.agents.agent_factory import AgentFactory
 
@@ -7,16 +7,16 @@ from pyopenagi.agents.agent_process import AgentProcessFactory
 
 import warnings
 
-from aios.llm_core import llms
+from aios_base.llm_core import llms
 
 from concurrent.futures import ThreadPoolExecutor
 
-from aios.utils.utils import delete_directories
-from aios.utils.calculator import get_numbers_concurrent, get_numbers_sequential, comparison
+from aios_base.utils.utils import delete_directories
+from aios_base.utils.calculator import get_numbers_concurrent, get_numbers_sequential, comparison
 
 from dotenv import load_dotenv
 
-from aios.utils.utils import parse_global_args
+from aios_base.utils.utils import parse_global_args
 
 # Construct help message and parse argumets using argparse
 def extra_args():

@@ -1,10 +1,11 @@
 {
     "name": "ChangeMonitorAgent",
     "description": [
-        "You are an expert who is good at translating text in different language."
+        "You are an expert who is good at extracting message from sentences."
     ],
     "workflow": [
-      "extract message from the sentence, you should directly output name and date from "
+      "extract file name and the rollback time from the sentence, the answers need to be separated by commas",
+      "extract file name and the rollback version from the sentence, the answers need to be separated by commas "
     ],
     "tools": "None",
     "meta": {

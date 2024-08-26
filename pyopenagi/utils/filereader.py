@@ -52,11 +52,11 @@ def update_file(filepath,content):
 
     file_dict = {
     '.pdf': update_pdf,
-    'docx': update_docx,
-    'txt': update_docx,
-    'md': update_md,
-    'xls': update_xls,
-    'xlsx': update_xlsx
+    '.docx': update_docx,
+    '.txt': update_docx,
+    '.md': update_md,
+    '.xls': update_xls,
+    '.xlsx': update_xlsx
     }
     if extension in file_dict:
         file_dict[extension](filepath,content)

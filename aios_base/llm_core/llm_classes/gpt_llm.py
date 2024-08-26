@@ -51,7 +51,7 @@ class GPTLLM(BaseLLM):
         agent_process.set_status("executing")
         agent_process.set_start_time(time.time())
         messages = agent_process.query.messages
-        print(messages)
+        # print(messages)
         self.logger.log(
             f"{agent_process.agent_name} is switched to executing.\n",
             level = "executing"

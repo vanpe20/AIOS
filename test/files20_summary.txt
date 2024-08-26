@@ -1,0 +1,11 @@
+Please search paper contains Mingyu Jin from ragbase;prollm,Uncertainty_is_fragile,StockAgent,Disentangling_Logic
+Please search paper contains The University of Hong Kong from ragbase;Mobileagent,os_copilot,Autoregressive_llama
+Please search paper contains Carnegie Mellon University from ragbase;promptbench,Mobileagent,Robutness_chatgpt,AgentReview
+Please search paper contains Rutgers University from ragbase; AIOS,prollm,Uncertainty_is_fragile,StockAgent,Disentangling_Logic
+Please search paper contains Peking University and Rutgers University from ragbase;prollm,StockAgent
+Please search for papers about Adversarial attack from ragbase in top 2 rank;
+Please search for papers about prompt engineering from ragbase in top 2 rank;
+Please search for papers about LLM Uncertainty from ragbase in top 2 rank;
+Please search paper contains Microsoft from ragbase;promptbench,AgentReview,Disentangling_Logic
+Please search for papers about Large Language Model from ragbase in top 3 rank;
+

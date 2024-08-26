@@ -8,7 +8,7 @@ from pyopenagi.agents.agent_process import (
 )
 
 from pyopenagi.utils.chat_template import Query
-from aios.storage.db_sdk import Data_Op
+from aios_base.storage.db_sdk import Data_Op
 import threading
 import argparse
 
@@ -29,6 +29,8 @@ class TranslationAgent(BaseAgent):
                  agent_name,
                  data_path,
                  task_input,
+                 retric_dic,
+                 redis,
                  agent_process_factory,
                  log_mode,
                  use_llm = None,
@@ -43,10 +45,9 @@ class TranslationAgent(BaseAgent):
         self.sub_name = sub_name
         self.file_mod_times = {}
         self.active = False
-        retric_dic = {}
+        self.retric_dic = retric_dic
         self.tools = None
-        pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
-        self.redis_client = redis.Redis(connection_pool=pool)
+        self.redis_client = redis
         self.database = Data_Op(retric_dic,self.redis_client)
 
     def build_system_instruction(self):
@@ -87,7 +88,6 @@ class TranslationAgent(BaseAgent):
             for sub_name in os.listdir(self.data_path):
                 if sub_name == '.DS_Store':
                     continue
-
                 client = self.database.get_collection(self.data_path,sub_name)
                 collections = client.list_collections()
                 for collection in collections:
@@ -101,6 +101,7 @@ class TranslationAgent(BaseAgent):
                 raise Exception("No such file")
             else:
                 db_name = ans_list[0]
+
 
             parts = db_name.split(os.sep)
             parts = parts[-2:]
@@ -126,7 +127,9 @@ class TranslationAgent(BaseAgent):
             if i == 0:
                 prompt = f"\nAt current step, you need to {workflow[i]} {self.task_input}"
             else:
+                self.messages = self.messages[:1]
                 prompt = f"\nAt current step, you need to {workflow[i]} {language}, <context>{doc}</context>"
+
             self.messages.append(
                     {"role": "user", 
                     "content": prompt}

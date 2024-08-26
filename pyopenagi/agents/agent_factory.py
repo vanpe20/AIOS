@@ -45,7 +45,7 @@ class AgentFactory:
         agent_class = getattr(agent_module, class_name)
         return agent_class
 
-    def activate_agent(self, agent_name, task_input,data_path=None,use_llm=None,raw_datapath = None,monitor_path = None):
+    def activate_agent(self, agent_name, task_input,retric_dic,redis,data_path=None, use_llm=None,raw_datapath = None,monitor_path = None):
         script_path = os.path.abspath(__file__)
         script_dir = os.path.dirname(script_path)
 
@@ -74,6 +74,8 @@ class AgentFactory:
                 task_input = task_input,
                 data_path = data_path,
                 use_llm = use_llm,
+                retric_dic = retric_dic,
+                redis = redis,
                 agent_process_factory = self.agent_process_factory,
                 log_mode = self.agent_log_mode,
                 raw_datapath = raw_datapath,
@@ -99,10 +101,12 @@ class AgentFactory:
         output = agent.run()
         self.deactivate_agent(agent.get_aid())
         return output
-    def run_retrieve(self,agent_name,task_input,data_path,use_llm,raw_datapath=None,monitor_path=None):
+    def run_retrieve(self,agent_name,task_input,retric_dic,redis,data_path,use_llm,raw_datapath=None,monitor_path=None):
         agent = self.activate_agent(
             agent_name=agent_name,
             task_input=task_input,
+            retric_dic=retric_dic,
+            redis=redis,
             data_path=data_path,
             use_llm=use_llm,
             raw_datapath=raw_datapath,

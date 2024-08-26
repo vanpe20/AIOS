@@ -2,7 +2,7 @@
 # placing a lock on memory that needs to be read later. This is implemented as
 # wrapper upon the access methods in BaseMemoryManager
 
-from aios.memory.base import (
+from aios_base.memory.base import (
     MemoryRequest,
     BaseMemoryManager
 )
@@ -17,7 +17,7 @@ from utils.compressor import (
     ZLIBCompressor
 )
 
-from aios.memory.base import (
+from aios_base.memory.base import (
     Memory
 )
 

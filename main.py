@@ -2,10 +2,10 @@
 # It requires no user input.
 
 
-from aios.scheduler.fifo_scheduler import FIFOScheduler
+from aios_base.scheduler.fifo_scheduler import FIFOScheduler
 
-
-from aios.utils.utils import (
+import subprocess
+from aios_base.utils.utils import (
     parse_global_args,
 )
 
@@ -15,15 +15,17 @@ from pyopenagi.agents.agent_process import AgentProcessFactory
 
 import warnings
 
-from aios.llm_core import llms
+from aios_base.llm_core import llms
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-from aios.utils.utils import delete_directories
+from aios_base.utils.utils import delete_directories
 from dotenv import load_dotenv
+import redis
+import logging
 
-
+logging.basicConfig(filename='rs.log', filemode='a', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 def clean_cache(root_directory):
     targets = {
         ".ipynb_checkpoints",
@@ -73,83 +75,118 @@ def main():
 
     agent_thread_pool = ThreadPoolExecutor(max_workers=500)
 
+    retric_dic = {}
+    pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+    redis_client = redis.Redis(connection_pool=pool)
+    result = subprocess.run(['brew', 'services', 'start', 'redis'], check=True)
+    result = subprocess.run(['brew', 'services', 'start', 'elastic/tap/elasticsearch-full'], check=True)
+        
     scheduler.start()
 
     # construct example agents
 
-    # travel_agent = agent_thread_pool.submit(
-    #     agent_factory.run_agent,
-    #     "example/travel_agent", "I want to take a trip to Paris, France from July 4th to July 10th 2024 and I am traveling from New York City. Help me plan this trip."
-    # )
 
-    # math_agent = agent_thread_pool.submit(
-    #     agent_factory.run_agent,
-    #     "example/math_agent",
-    #     "Convert 15000 MXN to Canadian Dollars and find out how much it would be in USD if 1 CAD equals 0.79 USD."
-    # )
+    # i = 0
+    # time = 0
+    # with open('/Users/manchester/Documents/rag/AIOS/test/files10_summary.txt', 'r') as file:
+    #     for line in file:
+    #         i +=1
+    #         retrieve_summaryagent = agent_thread_pool.submit(
+    #                         agent_factory.run_retrieve,
+    #                         "file_management/retrieve_summary_agent",
+    #                         line,
+    #                         retric_dic,
+    #                         redis_client,
+    #                         '/Users/manchester/Documents/data/rag_test20',
+    #                         True)
+    #         agent_tasks = [retrieve_summaryagent]
+    #         for r in as_completed(agent_tasks):
+    #                     _res = r.result()
+    #                     time += _res['agent_turnaround_time']
+    #                     logging.info(_res['agent_turnaround_time'])
 
-    # academic_agent = agent_thread_pool.submit(
-    #     agent_factory.run_agent,
-    #     "example/academic_agent",
-    #     "Summarize recent advancements in quantum computing from the past five years.",
-    # )
+    # time = 0
 
-    # # rec_agent = agent_thread_pool.submit(
-    #     agent_factory.run_agent,
-    #     "example/rec_agent", "Recommend two movies with groundbreaking visual effects released in the last fifteen years ranked between 1 and 20 with ratings above 8.0."
-    # )
+    retrieve_summaryagent = agent_thread_pool.submit(
+                agent_factory.run_retrieve,
+                "file_management/retrieve_summary_agent",
+                "Please search for the 2 papers with the highest correlation with large model uncertainty",
+                # 'Please search for papers in llm_base, whose authors contain Mingyu Jin and Kai Mei.',
+                retric_dic,
+                redis_client,
+                '/Users/manchester/Documents/data/rag_test1',
+                True)
+    agent_tasks = [retrieve_summaryagent]
+    for r in as_completed(agent_tasks):
+        _res = r.result()
+    
 
-    # creation_agent = agent_thread_pool.submit(
-    #     agent_factory.run_agent,
-    #     "example/creation_agent", "Create an image of a lush jungle with an ancient temple, evoking a sense of mystery and adventure."
-    # )
-    # retrieve_summaryagent = agent_thread_pool.submit(
-    #     agent_factory.run_retrieve,
-    #    "example/retrieve_summary_agent",
-    #     "Please search paper contains Rutgers University from rag_paper",
-    #     '/Users/manchester/Documents/data/rag_database',
-    #     True
-    # )
     # change_monitoragent = agent_thread_pool.submit(
     #     agent_factory.run_retrieve,
     #    "file_management/change_monitor_agent",
-    #     "Please change content in '/Users/manchester/Documents/rag/rag_source/physics/quantum.txt' to quantum of database physics",
+    #     "Please change content in '/Users/manchester/Documents/rag/rag_source/physics/quantum.txt' to old_quan in physics",
+    #     retric_dic,
+    #     redis_client,
     #     '/Users/manchester/Documents/data/rag_database',
     #     True,
     #     '/Users/manchester/Documents/rag/rag_source/change_data/quantum.txt',
     #     '/Users/manchester/Documents/rag/rag_source/physics'
     # )
+    # agent_tasks = [change_monitoragent]
+    # for r in as_completed(agent_tasks):
+    #     _res = r.result()
+
+
+
     # translation_agent = agent_thread_pool.submit(
     #     agent_factory.run_retrieve,
     #    "file_management/translation_agent",
     #     "Please translate file named quantum to Chinese",
+    #     retric_dic,
+    #     redis_client,
     #     '/Users/manchester/Documents/data/rag_database',
     #     True,
     # )
+    # agent_tasks = [translation_agent]
+    # for r in as_completed(agent_tasks):
+    #         _res = r.result()
 
     # rollback_agent = agent_thread_pool.submit(
     #     agent_factory.run_retrieve,
     #    "file_management/rollback_agent",
-    #     "Please rollback file named quantum to the version in 2024-01-03",
+    #     # "Please rollback file named quantum to the version in 2024-01-03",
+    #     "Please rollback file named quantum 5 versions",
+    #     retric_dic,
+    #     redis_client,
     #     '/Users/manchester/Documents/data/rag_database',
     #     True,
     # )
-    link_agent = agent_thread_pool.submit(
-        agent_factory.run_retrieve,
-       "file_management/link_agent",
-        "/Users/manchester/Documents/rag/rag_source/rag_paper/AIOS.pdf ",
-        '/Users/manchester/Documents/data/rag_database',
-        True,
-    )
+    # agent_tasks = [rollback_agent]
+    # for r in as_completed(agent_tasks):
+    #     _res = r.result()
 
-    # agent_tasks = [travel_agent, rec_agent, creation_agent, math_agent, academic_agent]
-    # agent_tasks = [rec_agent]
-    agent_tasks = [link_agent]
-    # agent_tasks = [academic_agent, creation_agent]
-    # agent_tasks = [creation_agent]
 
-    for r in as_completed(agent_tasks):
-        _res = r.result()
+    # link_agent = agent_thread_pool.submit(
+    #     agent_factory.run_retrieve,
+    #    "file_management/link_agent",
+    #     "/Users/manchester/Documents/rag/rag_source/rag_paper/AIOS.pdf ",
+    #     retric_dic,
+    #     redis_client,
+    #     '/Users/manchester/Documents/data/rag_database',
+    #     True,
+    # )
+
+    # agent_tasks = [link_agent]
+    # for r in as_completed(agent_tasks):
+    #         _res = r.result()
+
+
+
+
+
+
+
+
 
     scheduler.stop()
 

@@ -2,14 +2,14 @@
 # wrapper in this script.
 
 
-from aios.command_parser import PunctuationParser
+from aios_base.command_parser import PunctuationParser
 
-from aios.command_executor import Executor
+from aios_base.command_executor import Executor
 
-from aios.scheduler.fifo_scheduler import FIFOScheduler
+from aios_base.scheduler.fifo_scheduler import FIFOScheduler
 
 
-from aios.utils.utils import (
+from aios_base.utils.utils import (
     parse_global_args,
 )
 
@@ -19,10 +19,10 @@ from pyopenagi.agents.agent_process import AgentProcessFactory
 
 import warnings
 
-from aios.llm_core import llms
+from aios_base.llm_core import llms
 
 
-from aios.utils.utils import delete_directories
+from aios_base.utils.utils import delete_directories
 from dotenv import load_dotenv
 
 

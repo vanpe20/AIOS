@@ -6,12 +6,15 @@ class RetrieveSummaryAgent(RetrieveSummary):
                  task_input,
                  data_path,
                  use_llm,
+                 retric_dic,
+                 redis,
                  agent_process_factory,
                  log_mode:str,
                  sub_name=None,
                  raw_datapath = None,
+                 monitor_path = None
         ):
-        RetrieveSummary.__init__(self,agent_name,task_input,data_path,use_llm,agent_process_factory,log_mode)
+        RetrieveSummary.__init__(self,agent_name,task_input,data_path,use_llm,retric_dic,redis,agent_process_factory,log_mode)
         self.workflow_mode = "automatic"
 
         def manaul_workflow(self):
