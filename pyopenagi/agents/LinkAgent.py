@@ -127,23 +127,23 @@ class LinkAgent(BaseAgent):
         rounds = 0
         workflow = self.config['workflow']
         for i, step in enumerate(workflow):
-            with open('/Users/manchester/Documents/rag/AIOS/test/link.txt', 'r') as file:
-                for line in file:
-                    prompt = f"\nAt current step, you should to {workflow}. The sentence is {line}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for file named aios. You should \
-                            output in this format \'aios, 5 days 3 hours\'.  You need to output like format without other extra words"
-                    self.messages.append({"role": "user", "content": prompt})
-                    tool_use = None
-                    response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
-                    query = Query(
-                            messages = self.messages,
-                            tools = tool_use
-                            )
-                    )
-                    response_message = response.response_message
-                    print(response_message)
-                    logging.info(response_message)
-                    self.messages = self.messages[:1]
-            print(ssd)
+            # with open('/Users/manchester/Documents/rag/AIOS/test/link.txt', 'r') as file:
+            #     for line in file:
+            #         prompt = f"\nAt current step, you should to {workflow}. The sentence is {line}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for file named aios. You should \
+            #                 output in this format \'aios, 5 days 3 hours\'.  You need to output like format without other extra words"
+            #         self.messages.append({"role": "user", "content": prompt})
+            #         tool_use = None
+            #         response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+            #         query = Query(
+            #                 messages = self.messages,
+            #                 tools = tool_use
+            #                 )
+            #         )
+            #         response_message = response.response_message
+            #         print(response_message)
+            #         logging.info(response_message)
+            #         self.messages = self.messages[:1]
+            # print(ssd)
             prompt = f"\nAt current step, you need to {workflow} {self.task_input}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for aios. You need \
                 to output \'aios, 5 days 3 hours\'. If you input Please generate links for aios, there is not period of validity, you should output \'aios, None\'. You need to output like format without other words"
             self.messages.append(

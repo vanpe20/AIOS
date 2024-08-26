@@ -148,11 +148,11 @@ class RetrieveSummary(BaseAgent):
 
         self.logger.log(f"{task_input}\n", level="info")
 
-        with open('/Users/manchester/Documents/rag/AIOS/test/rs_example.txt', 'r') as file:
-            for line in file: 
-                name = self.pre_rag(line)
-                print(name)
-        print(ssd) 
+        # with open('/Users/manchester/Documents/rag/AIOS/test/rs_example.txt', 'r') as file:
+        #     for line in file: 
+        #         name = self.pre_rag(line)
+        #         print(name)
+        # print(ssd) 
         
         
         

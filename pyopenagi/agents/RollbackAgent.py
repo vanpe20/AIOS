@@ -141,27 +141,27 @@ class RollbackAgent(BaseAgent):
         request_waiting_times = []
         request_turnaround_times = []
         rounds = 0
-        with open('/Users/manchester/Documents/rag/AIOS/test/rollback.txt', 'r') as file:
-            for line in file:
-                if '-' in line:
-                    workflow = self.config['workflow'][0]
-                else:
-                    workflow = self.config['workflow'][1]
-                prompt = f"\nAt current step, you need to {workflow}.The sentence is {line}. Here is the example, if you input Please rollback file named quantum to the version in 2024-01-03, the file name is quantum and the time is 2024-01-03, so you should output like\
-               \'quantum, 2024-01-03\'. if you input Please rollback file named quantum 5 versions, the file name is quantum and the rollback version number is 5, so you should output \'quantum, 5\'. You need to output like format without other words"
-                self.messages.append(
-                            {"role": "user", 
-                            "content": prompt})
-                tool_use = None
-                response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
-                query = Query(
-                            messages = self.messages,
-                            tools = tool_use
-                            ))
-                response_message = response.response_message
-                logging.info(response_message)
-                self.messages = self.messages[:1]
-        print(ssd)
+        # with open('/Users/manchester/Documents/rag/AIOS/test/rollback.txt', 'r') as file:
+        #     for line in file:
+        #         if '-' in line:
+        #             workflow = self.config['workflow'][0]
+        #         else:
+        #             workflow = self.config['workflow'][1]
+        #         prompt = f"\nAt current step, you need to {workflow}.The sentence is {line}. Here is the example, if you input Please rollback file named quantum to the version in 2024-01-03, the file name is quantum and the time is 2024-01-03, so you should output like\
+        #        \'quantum, 2024-01-03\'. if you input Please rollback file named quantum 5 versions, the file name is quantum and the rollback version number is 5, so you should output \'quantum, 5\'. You need to output like format without other words"
+        #         self.messages.append(
+        #                     {"role": "user", 
+        #                     "content": prompt})
+        #         tool_use = None
+        #         response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+        #         query = Query(
+        #                     messages = self.messages,
+        #                     tools = tool_use
+        #                     ))
+        #         response_message = response.response_message
+        #         logging.info(response_message)
+        #         self.messages = self.messages[:1]
+        # print(ssd)
         
         
         if '-' in self.task_input:
