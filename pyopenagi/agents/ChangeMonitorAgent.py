@@ -140,15 +140,16 @@ class ChangeAgent(BaseAgent):
         response_message = response.response_message
         result = response_message.split(",")
         alter_data,metaname,sub_name = result[0], result[1], result[2]
+
+        jud = input('You will use content in {alter_data} change {metaname}. You should confirm it. Please input yes or no:')
+        if jud.lower() == 'no':
+            return 
         
         self.logger.log(f"{task_input}\n", level="info")
         path = os.path.join(self.data_path,sub_name,metaname)
         if not os.path.exists(path):
             if self.raw_datapath is None:
                 raise Exception('Database does\'s not exist and raw_date is empty')
-            jud = input(f"\n You will create {self.raw_datapath} in lsfs. Please input yes or no:")
-            if jud == 'no':
-                return
             self.database.create(self.data_path,sub_name,self.raw_datapath,metaname=metaname)
 
         self.monitor_run(sub_name,metaname,alter_data)
@@ -197,9 +198,6 @@ class ChangeAgent(BaseAgent):
 
             self.lock_file(sfm_file)
             self.lock_file(text_path)
-            jud = input(f"\n You will use the content in {text_path} to change the content in {sfm_file}, you need to confirm it. Please input yes or no:")
-            if jud.lower() == 'no':
-                return
 
             collection_lat = self.database.update(self.data_path,sub_name,alter_data,obj=metaname)
             text_end = collection_lat.get()['documents']

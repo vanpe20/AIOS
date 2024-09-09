@@ -130,7 +130,6 @@ class RollbackAgent(BaseAgent):
         if jud.lower() == 'no':
             print("rollback failed")
             return 
-        self.database.update(db_path,sub_name, document[0], obj=name)
         print("rollback success")
  
     def run(self):
@@ -205,6 +204,9 @@ class RollbackAgent(BaseAgent):
 
         if '-' in self.task_input:
             name, date = self.match(response_message,flag=True)
+            jud = input('The rollback file name is {name}, you need to confirm it. Please input yes or no:')
+            if jud.lower() == 'no':
+                return
             self.rollback(name,date,flag=True)
         else:
             name, date = self.match(response_message)
