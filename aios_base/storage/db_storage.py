@@ -9,16 +9,14 @@ from llama_index.core import PromptTemplate
 import chromadb
 from chromadb.api.types import Metadata
 import numpy as np
+import logging
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext,Document
 from llama_index.core.retrievers import VectorIndexRetriever
-import uuid
 import redis
 import uuid
-from elasticsearch import Elasticsearch
-import logging
 from whoosh.index import create_in
 from whoosh.fields import Schema, TEXT
 from whoosh.qparser import QueryParser
@@ -80,6 +78,9 @@ class DBStorage:
             
     def add_in_db(self, db_path, db_name, doc, metaname):
         add_path = os.path.join(db_path,db_name,metaname)
+        jud = input(f"\n {add_path} will be deleted, you will confirm it. Please input yes or no:")
+        if jud.lower() == 'no':
+            return
         if not os.path.exists(add_path):
             index = self.create_or_get_file(db_path,db_name,metaname,doc)
         else:
@@ -95,8 +96,6 @@ class DBStorage:
             else:
                 document = [doc]
                 
-            if self.redis_client.exists(metaname):
-                self.redis_client.append(metaname,documents)
             
             embedding = self.embed_model._embed(document)
             chroma_collection.add(ids=[id], embeddings=embedding)
@@ -105,46 +104,102 @@ class DBStorage:
         index.storage_context.persist(persist_dir=add_path)
  
 
-    def del_(self,db_path,db_name,metaname = None,text = None):
+    def del_(self,db_path,db_name=None,metaname = None,text = None):
         if metaname is None and text is None:
             raise ValueError('Must have one of metaname and text as arguments')
-        del_path = os.path.join(db_path,db_name)
-        if not os.path.exists(del_path):
-            raise FileNotFoundError('delete path is not exist')
-        else:    
-            if metaname:
-                del_path = os.path.join(del_path,metaname)
-                chroma_client = chromadb.PersistentClient(path=del_path)
-                chroma_collection = chroma_client.get_collection(metaname)
-                if 'state' in chroma_collection.metadata[0] and chroma_collection.metadata[0]['state'] == 1:
-                    raise Exception('The file is lock, you can not change it until you unlock it')
-                chroma_collection = chroma_collection.delete()
+        if db_name is not None:
+            del_path = os.path.join(db_path,db_name)
+            if not os.path.exists(del_path):
+                raise FileNotFoundError('delete path is not exist')
+            else:    
+                if metaname:
+                    del_path = os.path.join(del_path,metaname)
+                    chroma_client = chromadb.PersistentClient(path=del_path)
+                    chroma_collection = chroma_client.get_collection(metaname)
+                    if 'state' in chroma_collection.metadata[0] and chroma_collection.metadata[0]['state'] == 1:
+                        raise Exception('The file is lock, you can not change it until you unlock it')
+                    chroma_collection = chroma_collection.delete()
+                else:
+                    chroma_client = chromadb.PersistentClient(path=del_path)
+                    collections = chroma_client.list_collections()
+                    for collection in collections:
+                            if 'state' in collection.metadata[0] and collection.metadata[0]['state'] == 1:
+                                print('{} is lock, you can not change it until you unlock it'.format(collection.name))
+                                continue
+                            req = {"$contains": text}
+                            collection = collection.get(where_document=req)
+                            ids = collection['ids']
+                            if ids is None:
+                                continue
+                            else:
+                                path = collection.get()['metadatas'][0]['file_path']
+                                jud = input(f"\n {path} will be deleted, you will confirm it. Please input yes or no:")
+                                if jud.lower() == 'yes':
+                                    chroma_collection = collection.delete(ids=ids)
+                                else:
+                                    continue
+                vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+                index = VectorStoreIndex.from_vector_store(vector_store,embed_model=self.embed_model)
+                index.storage_context.persist(persist_dir=del_path)
+                if chroma_client.count_collections() == 0:
+                    os.rmdir(del_path)
+        else:
+            del_path = db_path
+            if not os.path.exists(del_path):
+                raise FileNotFoundError('delete path is not exist')
             else:
-                chroma_client = chromadb.PersistentClient(path=del_path)
-                collections = chroma_client.list_collections()
-                for collection in collections:
-                        if 'state' in collection.metadata[0] and collection.metadata[0]['state'] == 1:
-                            print('{} is lock, you can not change it until you unlock it'.format(collection.name))
-                            continue
-                        req = {"$contains": text}
-                        collection = collection.get(where_document=req)
-                        ids = collection['ids']
-                        if ids is None:
-                            continue
+                path = []
+                for root, dirs, files in os.walk(del_path):
+                    for dirname in dirs:
+                        tar_path = os.join(del_path,dirname)
+                        if metaname:
+                            chroma_client = chromadb.PersistentClient(path=tar_path)
+                            collections = chroma_client.list_collections()
+                            for collection in collections:
+                                if 'state' in chroma_collection.metadata[0] and chroma_collection.metadata[0]['state'] == 1:
+                                    raise Exception('The file is lock, you can not change it until you unlock it')
+                                if metaname == collection.name:
+                                    path.append(collection.get()['metadatas'][0]['file_path'])
                         else:
-                            chroma_collection = collection.delete(ids=ids)
+                            chroma_client = chromadb.PersistentClient(path=tar_path)
+                            collections = chroma_client.list_collections()
+                            for collection in collections:
+                                    if 'state' in collection.metadata[0] and collection.metadata[0]['state'] == 1:
+                                        print('{} is lock, you can not change it until you unlock it'.format(collection.name))
+                                        continue
+                                    req = {"$contains": text}
+                                    collection = collection.get(where_document=req)
+                                    ids = collection['ids']
+                                    if ids is None:
+                                        continue
+                                    else:
+                                        path = collection.get()['metadatas'][0]['file_path']
+                                        jud = input(f"\n {path} will be deleted, you will confirm it. Please input yes or no:")
+                                        if jud.lower() == 'yes':
+                                            chroma_collection = collection.delete(ids=ids)
+                                        else:
+                                            continue
+                            if chroma_client.count_collections() == 0:
+                                os.rmdir(tar_path)
+                if metaname:
+                    if len(path) == 0:
+                        raise Exception("There is no such file, please check your file name")
+                    elif len(path) == 1:
+                        tar_path = path[0]
+                    else:
+                        del_path = input(f'\n All eligible paths are as follows{path}, please choose which one you want to delete:')
+                        tar_path, _ = os.path.split(tar_path)
+                    chroma_client = chromadb.PersistentClient(path=tar_path)
+                    chroma_collection = chroma_client.get_collection(metaname)
+                    chroma_collection = chroma_collection.delete()
+                    if chroma_client.count_collections() == 0:
+                        os.rmdir(tar_path)
+            
             vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
             index = VectorStoreIndex.from_vector_store(vector_store,embed_model=self.embed_model)
             index.storage_context.persist(persist_dir=del_path)
-            if chroma_client.count_collections() == 0:
-                os.rmdir(del_path)
 
 
-        if metaname:
-            if self.redis_client.exists(metaname):
-                self.redis_client.delete(metaname)
-
-    
     def change_db(self,db_path,db_name,doc,metaname):
         change_path = os.path.join(db_path,db_name)
         if not os.path.exists(change_path):
@@ -169,8 +224,6 @@ class DBStorage:
             index = VectorStoreIndex.from_vector_store(vector_store, embed_model=self.embed_model)
             index.storage_context.persist(persist_dir=change_path)
         
-        if self.redis_client.exists(metaname):
-            self.redis_client.set(metaname, documents)
 
         return chroma_collection
     

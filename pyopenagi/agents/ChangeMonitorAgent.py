@@ -1,12 +1,9 @@
 
 from pyopenagi.agents.base_agent import BaseAgent
-
 import time
-
 from pyopenagi.agents.agent_process import (
     AgentProcess
 )
-
 from pyopenagi.utils.chat_template import Query
 from aios_base.storage.db_sdk import Data_Op
 import threading
@@ -20,6 +17,8 @@ import os
 import logging
 import subprocess
 import redis
+import threading
+import fcntl
 
 import numpy as np
 
@@ -50,6 +49,7 @@ class ChangeAgent(BaseAgent):
         self.tools = None
         self.redis_client = redis
         self.database = Data_Op(retric_dic,self.redis_client)
+        self.lock = threading.Lock()
 
     def scan_files(self):
         for root, _, files in os.walk(self.monitor_path):
@@ -62,17 +62,18 @@ class ChangeAgent(BaseAgent):
                 if os.path.exists(filepath):
                     current_mod_time = os.path.getmtime(filepath)
                     if current_mod_time != self.file_mod_times[filepath]:
-                        print(f"File modified: {filepath}")
-                        self.file_mod_times[filepath] = current_mod_time
-                        file_name = os.path.basename(filepath)
-                        path_parts = filepath.split(os.sep)
-                        folder_name = path_parts[-2]
-                        file_name, _ = os.path.splitext(file_name)
-                        self.monitor_run(folder_name,file_name,filepath)
+                        with self.lock:
+                            print(f"File modified: {filepath}")
+                            self.file_mod_times[filepath] = current_mod_time
+                            file_name = os.path.basename(filepath)
+                            path_parts = filepath.split(os.sep)
+                            folder_name = path_parts[-2]
+                            file_name, _ = os.path.splitext(file_name)
+                            self.monitor_run(folder_name,file_name,filepath)
                 else:
                     print(f"File deleted: {filepath}")
                     del self.file_mod_times[filepath]
-            time.sleep(5)
+                    
     def start_monitoring(self):
         self.active = True
         self.scan_files()
@@ -100,7 +101,12 @@ class ChangeAgent(BaseAgent):
     def stop_monitoring(self):
         self.active = False
     
-                
+    def lock_file(self,file):
+        fcntl.flock(file, fcntl.LOCK_EX)
+    
+    def unlock_file(self, file):
+        fcntl.flock(file, fcntl.LOCK_UN)
+           
     def run(self):
         # self.redis_client.select(1)
         # keys = self.redis_client.keys('*')
@@ -173,81 +179,92 @@ class ChangeAgent(BaseAgent):
 
     def monitor_run(self,sub_name,metaname,alter_data):
         
+        with self.lock:
+            sfm_file = os.path.join(self.data_path,sub_name,metaname)
+
+            collection_fore = self.database.get_collection(self.data_path,sub_name,metaname=metaname)
+            text_before = collection_fore.get()['documents']
+
+            text_path = collection_fore.get()['metadatas'][0]['file_path']
+            path_parts = text_path.split(os.sep)
+            text_name = os.sep.join(path_parts[-2:])
+            text_date = collection_fore.get()['metadatas'][0]['last_modified_date']
+
+            self.version(text_name,text_date,text_before,text_path,self.data_path,sub_name)
+
+            self.lock_file(sfm_file)
+            self.lock_file(text_path)
+            jud = input(f"\n You will use the content in {text_path} to change the content in {sfm_file}, you need to confirm it. Please input yes or no:")
+            if jud.lower() == 'no':
+                return
+
+            collection_lat = self.database.update(self.data_path,sub_name,alter_data,obj=metaname)
+            text_end = collection_lat.get()['documents']
+            update_file(text_path ,text_end)
+
+            self.unlock_file(sfm_file)
+            self.unlock_file(text_path)
+
+            print("version remember !!!!!!!!!!")
+
+            self.messages = []
+            self.build_system_instruction(1)
+
+            
+
+            request_waiting_times = []
+            request_turnaround_times = []
+
+            rounds = 0
+            result = []
+            # response_message = ''
         
-        collection_fore = self.database.get_collection(self.data_path,sub_name,metaname=metaname)
-        text_before = collection_fore.get()['documents']
-
-        text_path = collection_fore.get()['metadatas'][0]['file_path']
-        path_parts = text_path.split(os.sep)
-        text_name = os.sep.join(path_parts[-2:])
-        text_date = collection_fore.get()['metadatas'][0]['last_modified_date']
-
-        self.version(text_name,text_date,text_before,text_path,self.data_path,sub_name)
-
-
-        collection_lat = self.database.update(self.data_path,sub_name,alter_data,obj=metaname)
-        text_end = collection_lat.get()['documents']
-        update_file(text_path ,text_end)
-        print("version remember !!!!!!!!!!")
-
-        self.messages = []
-        self.build_system_instruction(1)
-
-        
-
-        request_waiting_times = []
-        request_turnaround_times = []
-
-        rounds = 0
-        result = []
-        # response_message = ''
-    
-        workflow = self.config['workflow'][1]
-        # for i, step in enumerate(workflow):
-        prompt = f"\nAt current step, you need to {workflow}, the content before the update is <context>{text_before}</context>, the content after the update is <context>{text_end}</context>"
-        self.messages.append(
-                    {"role": "user", 
-                    "content": prompt}
-                )
-        tool_use = None
-        response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
-        query = Query(
-                    messages = self.messages,
-                    tools = tool_use
+            workflow = self.config['workflow'][1]
+            # for i, step in enumerate(workflow):
+            prompt = f"\nAt current step, you need to {workflow}, the content before the update is <context>{text_before}</context>, the content after the update is <context>{text_end}</context>"
+            self.messages.append(
+                        {"role": "user", 
+                        "content": prompt}
                     )
-            )
+            tool_use = None
+            response, start_times, end_times, waiting_times, turnaround_times = self.get_response(
+            query = Query(
+                        messages = self.messages,
+                        tools = tool_use
+                        )
+                )
 
-        response_message = response.response_message
+            response_message = response.response_message
 
-        request_waiting_times.extend(waiting_times)
-        request_turnaround_times.extend(turnaround_times)
+            request_waiting_times.extend(waiting_times)
+            request_turnaround_times.extend(turnaround_times)
 
-            # if i == 0:
-        self.set_start_time(start_times[0])
+                # if i == 0:
+            self.set_start_time(start_times[0])
 
-                # tool_calls = response.tool_calls
-                
-        self.messages.append({
-                    "role": "user",
-                    "content": response_message
-        })
+                    # tool_calls = response.tool_calls
+                    
+            self.messages.append({
+                        "role": "user",
+                        "content": response_message
+            })
 
-            # if i == len(workflow) - 1:
-        final_result = self.messages[-1]
-        self.logger.log(f"{response_message}\n", level="info")
-        rounds += 1
-        self.set_status("done")
-        self.set_end_time(time=time.time())
+                # if i == len(workflow) - 1:
+            final_result = self.messages[-1]
+            self.logger.log(f"{response_message}\n", level="info")
+            rounds += 1
+            self.set_status("done")
+            self.set_end_time(time=time.time())
 
-        return {
-            "agent_name": self.agent_name,
-            "result": final_result,
-            "rounds": rounds,
-            "agent_waiting_time": self.start_time - self.created_time,
-            "agent_turnaround_time": self.end_time - self.created_time,
-            "request_waiting_times": request_waiting_times,
-            "request_turnaround_times": request_turnaround_times,
-        }
+            return {
+                "agent_name": self.agent_name,
+                "result": final_result,
+                "rounds": rounds,
+                "agent_waiting_time": self.start_time - self.created_time,
+                "agent_turnaround_time": self.end_time - self.created_time,
+                "request_waiting_times": request_waiting_times,
+                "request_turnaround_times": request_turnaround_times,
+            }
 
     def parse_result(self, prompt):
         return prompt

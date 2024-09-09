@@ -76,9 +76,9 @@ class RetrieveSummary(BaseAgent):
             top_k,query,sub_name = result[0],result[1],result[2]
             if top_k.isdigit():
                 top_k = int(top_k)
-            # else:
-            #     raise ValueError('you need input Arabic numerals in the top files')
-            # ans, name = self.database.semantic_retrieve(self.data_path,query,top_k,db_name=sub_name)
+            else:
+                raise ValueError('you need input Arabic numerals in the top files')
+            ans, name = self.database.semantic_retrieve(self.data_path,query,top_k,db_name=sub_name)
         else:
             s_messages.append(
                 {"role": "system", "content": 'You are good at extracting messages from sentence' })
@@ -97,6 +97,7 @@ class RetrieveSummary(BaseAgent):
                     )
             )
             response_message = response.response_message
+            print(response_message)
             logging.info(response_message)
             result = response_message.split(',')
             query = result[0]
@@ -107,14 +108,14 @@ class RetrieveSummary(BaseAgent):
                 que_tmp = query.split('and')
                 for i in range(len(que_tmp)):
                     que.append(que_tmp[i])
-                # ans,name = self.database.keyword_retrieve(self.data_path,que,db_name=sub_name,con='and')
+                ans,name = self.database.keyword_retrieve(self.data_path,que,db_name=sub_name,con='and')
             elif 'or' in query:
                 que_tmp = query.split('and')
                 for i in range(len(que_tmp)):
                     que.append(que_tmp[i])
-                # ans,name = self.database.keyword_retrieve(self.data_path,que,db_name=sub_name,con='or')
-        return result
-        # return ans, name
+                ans,name = self.database.keyword_retrieve(self.data_path,que,db_name=sub_name,con='or')
+        # return result
+        return ans, name
 
 
     def build_system_instruction(self):

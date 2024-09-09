@@ -2,7 +2,6 @@
 from .base import BaseStorage
 from pathlib import PurePosixPath
 import json
-import shutil
 import os
 from llama_index.core import PromptTemplate
 import chromadb
@@ -15,7 +14,6 @@ from llama_index.core import StorageContext,Document
 from llama_index.core.retrievers import VectorIndexRetriever
 import uuid
 import redis
-from elasticsearch import Elasticsearch
 import logging
 # from db_storage import DBStorage
 from .db_storage import DBStorage
@@ -81,7 +79,7 @@ class Data_Op(DBStorage):
     
     def delete(self,db_path,db_name,metaname):
 
-        return super().del_db(db_path,db_name,metaname)
+        return super().del_(db_path,db_name,metaname)
     
     
     def group_keywords(self,db_path,query,new_name,db_name = None,con = None):

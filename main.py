@@ -107,18 +107,17 @@ def main():
 
     # time = 0
 
-    retrieve_summaryagent = agent_thread_pool.submit(
-                agent_factory.run_retrieve,
-                "file_management/retrieve_summary_agent",
-                "Please search for the 2 papers with the highest correlation with large model uncertainty",
-                # 'Please search for papers in llm_base, whose authors contain Mingyu Jin and Kai Mei.',
-                retric_dic,
-                redis_client,
-                '/Users/manchester/Documents/data/rag_test1',
-                True)
-    agent_tasks = [retrieve_summaryagent]
-    for r in as_completed(agent_tasks):
-        _res = r.result()
+    # retrieve_summaryagent = agent_thread_pool.submit(
+    #             agent_factory.run_retrieve,
+    #             "file_management/retrieve_summary_agent",
+    #             "Please search for the 2 papers with the highest correlation with large model uncertainty.",
+    #             retric_dic,
+    #             redis_client,
+    #             '/Users/manchester/Documents/data/rag_test1',
+    #             True)
+    # agent_tasks = [retrieve_summaryagent]
+    # for r in as_completed(agent_tasks):
+    #     _res = r.result()
     
 
     # change_monitoragent = agent_thread_pool.submit(
@@ -166,25 +165,19 @@ def main():
     #     _res = r.result()
 
 
-    # link_agent = agent_thread_pool.submit(
-    #     agent_factory.run_retrieve,
-    #    "file_management/link_agent",
-    #     "/Users/manchester/Documents/rag/rag_source/rag_paper/AIOS.pdf ",
-    #     retric_dic,
-    #     redis_client,
-    #     '/Users/manchester/Documents/data/rag_database',
-    #     True,
-    # )
+    link_agent = agent_thread_pool.submit(
+        agent_factory.run_retrieve,
+       "file_management/link_agent",
+        "/Users/manchester/Documents/rag/rag_source/rag_paper/AIOS.pdf ",
+        retric_dic,
+        redis_client,
+        '/Users/manchester/Documents/data/rag_database',
+        True,
+    )
 
-    # agent_tasks = [link_agent]
-    # for r in as_completed(agent_tasks):
-    #         _res = r.result()
-
-
-
-
-
-
+    agent_tasks = [link_agent]
+    for r in as_completed(agent_tasks):
+            _res = r.result()
 
 
 

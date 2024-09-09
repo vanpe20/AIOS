@@ -144,8 +144,9 @@ class LinkAgent(BaseAgent):
             #         logging.info(response_message)
             #         self.messages = self.messages[:1]
             # print(ssd)
-            prompt = f"\nAt current step, you need to {workflow} {self.task_input}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for aios. You need \
-                to output \'aios, 5 days 3 hours\'. If you input Please generate links for aios, there is not period of validity, you should output \'aios, None\'. You need to output like format without other words"
+            # prompt = f"\nAt current step, you need to {workflow} {self.task_input}. Here is the example, if you input Please generate a validity period of 5 days and 3 hours for aios. You need \
+            #     to output \'aios, 5 days 3 hours\'. If you input Please generate links for aios, there is not period of validity, you should output \'aios, None\'. You need to output like format without other words"
+            prompt = f"\nAt current step,{workflow}, {self.task_input}"
             self.messages.append(
                     {"role": "user", 
                     "content": prompt}
@@ -179,10 +180,10 @@ class LinkAgent(BaseAgent):
         self.set_status("done")
         self.set_end_time(time=time.time())
         
-        name, date = self.match(response_message)
-        path = self.search_path(name)
-        link = self.link.generate_shareable_link(path,date)
-        self.logger.log(f"{link}\n", level="info")
+        # name, date = self.match(response_message)
+        # path = self.search_path(name)
+        # link = self.link.generate_shareable_link(path,date)
+        # self.logger.log(f"{link}\n", level="info")
 
         return {
             "agent_name": self.agent_name,
