@@ -125,6 +125,11 @@ class RollbackAgent(BaseAgent):
         text_before = collection_fore.get()['documents']
         text_date = collection_fore.get()['metadatas'][0]['last_modified_date']
         self.version(name,text_date,text_before,text_path,db_path)
+        path = os.path.join(db_path,sub_name,name)
+        jud = input(f'\n The target file is {path}, you need to confirm it. Please input yes or no:')
+        if jud.lower() == 'no':
+            print("rollback failed")
+            return 
         self.database.update(db_path,sub_name, document[0], obj=name)
         print("rollback success")
  

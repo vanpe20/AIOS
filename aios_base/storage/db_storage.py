@@ -78,9 +78,6 @@ class DBStorage:
             
     def add_in_db(self, db_path, db_name, doc, metaname):
         add_path = os.path.join(db_path,db_name,metaname)
-        jud = input(f"\n {add_path} will be deleted, you will confirm it. Please input yes or no:")
-        if jud.lower() == 'no':
-            return
         if not os.path.exists(add_path):
             index = self.create_or_get_file(db_path,db_name,metaname,doc)
         else:

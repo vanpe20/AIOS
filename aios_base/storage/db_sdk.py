@@ -37,9 +37,6 @@ class Data_Op(DBStorage):
 
     def create(self,db_path,db_name,doc,metaname=None):
         # create chroma database by single doc or file
-        jud = input(f"\n {path} will be created in lsfs. You need to confirm it. Please input yes or no:")
-        if jud.lower() == 'no':
-            return 
         if not os.path.exists(doc):
             super().create_or_get_file(db_path,db_name,doc)
         else:

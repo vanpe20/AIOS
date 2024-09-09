@@ -146,6 +146,9 @@ class ChangeAgent(BaseAgent):
         if not os.path.exists(path):
             if self.raw_datapath is None:
                 raise Exception('Database does\'s not exist and raw_date is empty')
+            jud = input(f"\n You will create {self.raw_datapath} in lsfs. Please input yes or no:")
+            if jud == 'no':
+                return
             self.database.create(self.data_path,sub_name,self.raw_datapath,metaname=metaname)
 
         self.monitor_run(sub_name,metaname,alter_data)
